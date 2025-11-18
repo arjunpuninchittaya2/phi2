@@ -12,13 +12,19 @@ import {
     Text,
     Divider,
     Button,
+    Accordion,
+    AccordionItem,
+    AccordionButton,
+    AccordionPanel,
+    AccordionIcon,
 } from '@chakra-ui/react';
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useMemo, useEffect } from 'react';
 import { Handle, Position } from 'reactflow';
-import { InlineMath } from 'react-katex';
+import { BlockMath } from 'react-katex';
 import 'katex/dist/katex.min.css';
 import { SolverNodeData } from '../types';
 import { PHYSICS_EQUATIONS, getAllCategories, getEquationsByCategory } from '../equations';
+import { usePhysicsSolver } from '../PhysicsSolverContext';
 
 interface SolverNodeProps {
     data: SolverNodeData;
@@ -26,11 +32,14 @@ interface SolverNodeProps {
 }
 
 export const SolverNode = memo(({ data, id }: SolverNodeProps) => {
+    const { calculateSolver, getSolverResult } = usePhysicsSolver();
     const categories = useMemo(() => getAllCategories(), []);
     const selectedEquation = useMemo(
         () => PHYSICS_EQUATIONS.find((eq) => eq.id === data.equationId),
         [data.equationId]
     );
+
+    const solverResult = getSolverResult(id);
 
     const handleEquationChange = useCallback(
         (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -60,11 +69,18 @@ export const SolverNode = memo(({ data, id }: SolverNodeProps) => {
     );
 
     const handleSolve = useCallback(() => {
-        const event = new CustomEvent('solveEquation', {
-            detail: { nodeId: id },
-        });
-        window.dispatchEvent(event);
-    }, [id]);
+        calculateSolver(id);
+    }, [id, calculateSolver]);
+
+    // Auto-solve when equation or solve-for changes
+    useEffect(() => {
+        if (data.equationId && data.solveFor) {
+            const timer = setTimeout(() => {
+                calculateSolver(id);
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [data.equationId, data.solveFor, id, calculateSolver]);
 
     return (
         <Box
@@ -72,7 +88,8 @@ export const SolverNode = memo(({ data, id }: SolverNodeProps) => {
             border="2px solid"
             borderColor="purple.500"
             borderRadius="md"
-            minW="300px"
+            minW="350px"
+            maxW="500px"
             p={4}
         >
             <VStack
@@ -133,7 +150,7 @@ export const SolverNode = memo(({ data, id }: SolverNodeProps) => {
                                 Equation:
                             </Text>
                             <Box color="white">
-                                <InlineMath math={selectedEquation.equation} />
+                                <BlockMath math={selectedEquation.equation} />
                             </Box>
                         </Box>
 
@@ -180,6 +197,68 @@ export const SolverNode = memo(({ data, id }: SolverNodeProps) => {
                         >
                             Solve
                         </Button>
+
+                        {/* Display solution steps */}
+                        {solverResult && (
+                            <Accordion
+                                allowToggle
+                                defaultIndex={[0]}
+                            >
+                                <AccordionItem
+                                    border="none"
+                                    bg="gray.900"
+                                    borderRadius="md"
+                                >
+                                    <AccordionButton>
+                                        <Box
+                                            flex="1"
+                                            textAlign="left"
+                                        >
+                                            <Text
+                                                color="purple.300"
+                                                fontSize="xs"
+                                            >
+                                                Solution Steps
+                                            </Text>
+                                        </Box>
+                                        <AccordionIcon />
+                                    </AccordionButton>
+                                    <AccordionPanel pb={4}>
+                                        <VStack
+                                            align="stretch"
+                                            spacing={2}
+                                        >
+                                            {solverResult.error ? (
+                                                <Text
+                                                    color="red.400"
+                                                    fontSize="xs"
+                                                >
+                                                    Error: {solverResult.error}
+                                                </Text>
+                                            ) : (
+                                                solverResult.steps.map((step, idx) => (
+                                                    <Box key={idx}>
+                                                        <Text
+                                                            color="gray.400"
+                                                            fontSize="xs"
+                                                        >
+                                                            {step.description}:
+                                                        </Text>
+                                                        <Box
+                                                            color="white"
+                                                            fontSize="sm"
+                                                            mt={1}
+                                                        >
+                                                            <BlockMath math={step.equation} />
+                                                        </Box>
+                                                    </Box>
+                                                ))
+                                            )}
+                                        </VStack>
+                                    </AccordionPanel>
+                                </AccordionItem>
+                            </Accordion>
+                        )}
                     </>
                 )}
             </VStack>

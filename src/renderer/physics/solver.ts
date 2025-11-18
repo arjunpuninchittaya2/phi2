@@ -106,16 +106,16 @@ export function solveEquation(
         try {
             // Substitute all values into the solved expression
             let expr = solvedExpr;
-            const substitutions: Record<string, number> = {};
             
+            // Substitute each variable value
             Object.entries(values).forEach(([varName, varData]) => {
                 if (varName !== solveFor) {
-                    substitutions[varName] = varData.value;
+                    expr = expr.sub(varName, String(varData.value));
                 }
             });
             
-            // Substitute values into the expression
-            expr = expr.evaluate(substitutions);
+            // Evaluate the expression numerically
+            expr = expr.evaluate();
             
             const resultValue = parseFloat(expr.toString());
             if (!isNaN(resultValue)) {

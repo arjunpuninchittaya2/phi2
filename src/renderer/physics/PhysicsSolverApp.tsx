@@ -22,6 +22,7 @@ import { VariableNode } from './nodes/VariableNode';
 import { SolverNode } from './nodes/SolverNode';
 import { OutputNode } from './nodes/OutputNode';
 import { PlotNode } from './nodes/PlotNode';
+import { PhysicsSolverProvider } from './PhysicsSolverContext';
 import {
     VariableNodeData,
     SolverNodeData,
@@ -135,98 +136,104 @@ export const PhysicsSolverApp = memo(() => {
     }, [setNodes]);
 
     return (
-        <VStack
-            bg="gray.900"
-            h="100vh"
-            spacing={0}
-            w="100vw"
+        <PhysicsSolverProvider
+            edges={edges}
+            nodes={nodes}
+            onNodesChange={setNodes}
         >
-            {/* Header */}
-            <Box
-                bg="gray.800"
-                borderBottom="1px solid"
-                borderColor="gray.700"
-                p={4}
-                w="full"
+            <VStack
+                bg="gray.900"
+                h="100vh"
+                spacing={0}
+                w="100vw"
             >
-                <HStack
-                    justify="space-between"
+                {/* Header */}
+                <Box
+                    bg="gray.800"
+                    borderBottom="1px solid"
+                    borderColor="gray.700"
+                    p={4}
                     w="full"
                 >
-                    <Text
-                        color="white"
-                        fontSize="xl"
-                        fontWeight="bold"
+                    <HStack
+                        justify="space-between"
+                        w="full"
                     >
-                        Physics Equation Solver
-                    </Text>
-                    <HStack spacing={2}>
-                        <Button
-                            colorScheme="blue"
-                            size="sm"
-                            onClick={addVariableNode}
+                        <Text
+                            color="white"
+                            fontSize="xl"
+                            fontWeight="bold"
                         >
-                            + Variable
-                        </Button>
-                        <Button
-                            colorScheme="purple"
-                            size="sm"
-                            onClick={addSolverNode}
-                        >
-                            + Solver
-                        </Button>
-                        <Button
-                            colorScheme="green"
-                            size="sm"
-                            onClick={addOutputNode}
-                        >
-                            + Output
-                        </Button>
-                        <Button
-                            colorScheme="orange"
-                            size="sm"
-                            onClick={addPlotNode}
-                        >
-                            + Plot
-                        </Button>
+                            Physics Equation Solver
+                        </Text>
+                        <HStack spacing={2}>
+                            <Button
+                                colorScheme="blue"
+                                size="sm"
+                                onClick={addVariableNode}
+                            >
+                                + Variable
+                            </Button>
+                            <Button
+                                colorScheme="purple"
+                                size="sm"
+                                onClick={addSolverNode}
+                            >
+                                + Solver
+                            </Button>
+                            <Button
+                                colorScheme="green"
+                                size="sm"
+                                onClick={addOutputNode}
+                            >
+                                + Output
+                            </Button>
+                            <Button
+                                colorScheme="orange"
+                                size="sm"
+                                onClick={addPlotNode}
+                            >
+                                + Plot
+                            </Button>
+                        </HStack>
                     </HStack>
-                </HStack>
-            </Box>
+                </Box>
 
-            {/* React Flow Canvas */}
-            <Box
-                flex="1"
-                w="full"
-            >
-                <ReactFlow
-                    edges={edges}
-                    fitView
-                    nodeTypes={nodeTypes}
-                    nodes={nodes}
-                    onConnect={onConnect}
-                    onEdgesChange={onEdgesChange}
-                    onNodesChange={onNodesChange}
+                {/* React Flow Canvas */}
+                <Box
+                    flex="1"
+                    w="full"
                 >
-                    <Background />
-                    <Controls />
-                    <MiniMap
-                        nodeColor={(node) => {
-                            switch (node.type) {
-                                case 'variable':
-                                    return '#3182ce';
-                                case 'solver':
-                                    return '#805ad5';
-                                case 'output':
-                                    return '#48bb78';
-                                case 'plot':
-                                    return '#dd6b20';
-                                default:
-                                    return '#718096';
-                            }
-                        }}
-                    />
-                </ReactFlow>
-            </Box>
-        </VStack>
+                    <ReactFlow
+                        edges={edges}
+                        fitView
+                        nodeTypes={nodeTypes}
+                        nodes={nodes}
+                        onConnect={onConnect}
+                        onEdgesChange={onEdgesChange}
+                        onNodesChange={onNodesChange}
+                    >
+                        <Background />
+                        <Controls />
+                        <MiniMap
+                            nodeColor={(node) => {
+                                switch (node.type) {
+                                    case 'variable':
+                                        return '#3182ce';
+                                    case 'solver':
+                                        return '#805ad5';
+                                    case 'output':
+                                        return '#48bb78';
+                                    case 'plot':
+                                        return '#dd6b20';
+                                    default:
+                                        return '#718096';
+                                }
+                            }}
+                        />
+                    </ReactFlow>
+                </Box>
+            </VStack>
+        </PhysicsSolverProvider>
     );
 });
