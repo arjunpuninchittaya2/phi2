@@ -12,6 +12,7 @@ import { HotkeysProvider } from './contexts/HotKeyContext';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { useAsyncEffect } from './hooks/useAsyncEffect';
 import { Main } from './main';
+import { PhysicsModeWrapper } from './PhysicsModeWrapper';
 import { ipcRenderer } from './safeIpc';
 import { darktheme } from './theme';
 import './i18n';
@@ -74,26 +75,30 @@ export const App = memo(() => {
     }, [settings?.language]);
 
     return (
-        <ChakraProvider theme={darktheme}>
-            <ColorModeScript initialColorMode={darktheme.config.initialColorMode} />
-            <HotkeysProvider>
-                <ContextMenuProvider>
-                    <AlertBoxProvider>
-                        {!url || !settings || !pythonInfo ? (
-                            <LoadingComponent />
-                        ) : (
-                            <SettingsProvider initialSettings={settings}>
-                                <BackendProvider
-                                    pythonInfo={pythonInfo}
-                                    url={url}
-                                >
-                                    <Main />
-                                </BackendProvider>
-                            </SettingsProvider>
-                        )}
-                    </AlertBoxProvider>
-                </ContextMenuProvider>
-            </HotkeysProvider>
-        </ChakraProvider>
+        <PhysicsModeWrapper
+            originalApp={
+                <ChakraProvider theme={darktheme}>
+                    <ColorModeScript initialColorMode={darktheme.config.initialColorMode} />
+                    <HotkeysProvider>
+                        <ContextMenuProvider>
+                            <AlertBoxProvider>
+                                {!url || !settings || !pythonInfo ? (
+                                    <LoadingComponent />
+                                ) : (
+                                    <SettingsProvider initialSettings={settings}>
+                                        <BackendProvider
+                                            pythonInfo={pythonInfo}
+                                            url={url}
+                                        >
+                                            <Main />
+                                        </BackendProvider>
+                                    </SettingsProvider>
+                                )}
+                            </AlertBoxProvider>
+                        </ContextMenuProvider>
+                    </HotkeysProvider>
+                </ChakraProvider>
+            }
+        />
     );
 });
