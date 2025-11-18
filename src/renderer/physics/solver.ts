@@ -157,7 +157,6 @@ function convertNerdamerToLatex(expr: string, solveFor: string): string {
     // Basic conversion - replace common operators
     let latex = expr
         .replace(/\*/g, ' \\cdot ')
-        .replace(/\^/g, '^')
         .replace(/sqrt\(([^)]+)\)/g, '\\sqrt{$1}');
     
     // Add the variable being solved for
@@ -187,9 +186,7 @@ function generateSubstitutionLatex(
         latex = latex.replace(regex, `${value}`);
     });
     
-    latex = latex
-        .replace(/\*/g, ' \\cdot ')
-        .replace(/\^/g, '^');
+    latex = latex.replace(/\*/g, ' \\cdot ');
     
     return latex;
 }
